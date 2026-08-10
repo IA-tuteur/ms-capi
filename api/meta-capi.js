@@ -32,7 +32,11 @@ module.exports = async function handler(req, res) {
   }
 
   const secret = req.query.secret || req.headers["x-webhook-secret"];
-  if (!secret || secret !== process.env.WEBHOOK_SECRET) {
+  const validSecrets = (process.env.WEBHOOK_SECRET || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (!secret || !validSecrets.includes(secret)) {
     return res.status(401).json({ error: "Unauthorized" });
   }
 
