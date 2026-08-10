@@ -46,6 +46,8 @@ module.exports = async function handler(req, res) {
     currency,
     event_source_url,
     test_event_code,
+    pixel_id: bodyPixelId,
+    access_token: bodyAccessToken,
   } = req.body;
 
   if (!event_name) {
@@ -78,11 +80,11 @@ module.exports = async function handler(req, res) {
     };
   }
 
-  const pixelId = process.env.PIXEL_ID;
-  const accessToken = process.env.CAPI_ACCESS_TOKEN;
+  const pixelId = bodyPixelId || process.env.PIXEL_ID;
+  const accessToken = bodyAccessToken || process.env.CAPI_ACCESS_TOKEN;
 
   if (!pixelId || !accessToken) {
-    return res.status(500).json({ error: "Missing PIXEL_ID or CAPI_ACCESS_TOKEN" });
+    return res.status(500).json({ error: "Missing pixel_id or access_token" });
   }
 
   const url = `https://graph.facebook.com/${GRAPH_API_VERSION}/${pixelId}/events`;
