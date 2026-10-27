@@ -2,6 +2,14 @@ const crypto = require("crypto");
 
 const GRAPH_API_VERSION = "v20.0";
 
+// Multi-client : chaque clé = valeur de ?secret=
+const clients = {
+  YoungEngineers: {
+    pixelId: process.env.PIXEL_ID_YOUNG,
+    accessToken: process.env.ACCESS_TOKEN_YOUNG,
+  },
+};
+
 function sha256(value) {
   if (!value) return null;
   return crypto
@@ -84,8 +92,12 @@ module.exports = async function handler(req, res) {
     };
   }
 
-  const pixelId = bodyPixelId || process.env.PIXEL_ID;
-  const accessToken = bodyAccessToken || process.env.CAPI_ACCESS_TOKEN;
+  // Résolution multi-client :
+  // 1. Si le secret matche un client connu → ses credentials
+  // 2. Sinon → body override ou variables par défaut
+  const client = clients[secret];
+  const pixelId = (client && client.pixelId) || bodyPixelId || process.env.PIXEL_ID;
+  const accessToken = (client && client.accessToken) || bodyAccessToken || process.env.CAPI_ACCESS_TOKEN;
 
   if (!pixelId || !accessToken) {
     return res.status(500).json({ error: "Missing pixel_id or access_token" });
